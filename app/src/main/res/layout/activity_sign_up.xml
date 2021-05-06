@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".SignUpActivity">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:text="Sign Up"
+        android:gravity="center"
+        android:textSize="40dp"
+        />
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp">
+
+        <EditText
+            android:layout_width="350dp"
+            android:id="@+id/newId"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:hint="이메일 입력"/>
+
+        <EditText
+            android:layout_width="350dp"
+            android:id="@+id/newPwd"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:hint="비밀번호 입력"/>
+
+        <EditText
+            android:layout_width="350dp"
+            android:id="@+id/rePwd"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:hint="비밀번호 재입력"/>
+
+        <EditText
+            android:layout_width="350dp"
+            android:id="@+id/newNick"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:hint="닉네임 입력"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:orientation="horizontal">
+        <RadioGroup
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="남성"/>
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="여성"/>
+
+        </RadioGroup>
+
+
+    </LinearLayout>
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="생년월일 선택하기"/>
+
+        <DatePicker
+            android:id="@+id/dpSpinner"
+            android:datePickerMode="spinner"
+            android:calendarViewShown="false"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+
+    </LinearLayout>
+
+
+</LinearLayout>

@@ -50,7 +50,7 @@ class LoginActivity : AppCompatActivity() {
 
 
 
-        loginBtn.setOnClickListener {
+/*        loginBtn.setOnClickListener {
             Log.d("loginBtn", "loginBtn 클릭")
             val intent = Intent(this@LoginActivity , MainActivity::class.java)
             intent.putExtra("id", email.text.toString())
@@ -59,8 +59,40 @@ class LoginActivity : AppCompatActivity() {
             Log.d("pwd : ",  password.text.toString())
             //startActivityForResult(intent , SECOND_ACTIVITY)
             startActivity(intent)
+        }*/
+
+        loginBtn.setOnClickListener {
+        auth = Firebase.auth
+        auth.signInWithEmailAndPassword(email.text.toString(), password.text.toString())
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    // Sign in success, update UI with the signed-in user's information
+                    Log.d("TAG", "signInWithEmail:success")
+                    val user = auth.currentUser
+                    updateUI(user)
+
+                    val intent = Intent(this@LoginActivity , HomeActivity::class.java)
+                    intent.putExtra("id", email.text.toString())
+                    intent.putExtra("pwd", password.text.toString())
+                    Log.d("id : ",  email.text.toString())
+                    Log.d("pwd : ",  password.text.toString())
+                    startActivity(intent)
+
+                } else {
+                    // If sign in fails, display a message to the user.
+                    Log.w("TAG", "signInWithEmail:failure", task.exception)
+                    Toast.makeText(baseContext, "Authentication failed.",
+                        Toast.LENGTH_SHORT).show()
+                    updateUI(null)
+                }
+            }
         }
 
+
+
+    }
+
+    private fun updateUI(user: FirebaseUser?) {
 
     }
 

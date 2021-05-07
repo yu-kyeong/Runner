@@ -18,7 +18,7 @@ class MainActivity : AppCompatActivity() {
     //firebase
     val RC_SIGN_IN = 1000
     private lateinit var auth: FirebaseAuth
-    lateinit var signUp : Button
+    //lateinit var signUp : Button
     lateinit var logIn : Button
 
 
@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         //button
-         signUp = findViewById(R.id.sign_up)
+        val signUp : Button = findViewById(R.id.sign_up)
          logIn = findViewById(R.id.log_in)
 
         signUp.setOnClickListener {

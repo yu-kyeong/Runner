@@ -71,7 +71,7 @@ class LoginActivity : AppCompatActivity() {
                     val user = auth.currentUser
                     updateUI(user)
 
-                    val intent = Intent(this@LoginActivity , HomeActivity::class.java)
+                    val intent = Intent(this@LoginActivity , MapActivity::class.java)
                     intent.putExtra("id", email.text.toString())
                     intent.putExtra("pwd", password.text.toString())
                     Log.d("id : ",  email.text.toString())

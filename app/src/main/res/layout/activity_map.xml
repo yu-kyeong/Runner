@@ -12,13 +12,31 @@
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
-        android:layout_height="400dp"
-        android:layout_weight="1"/>
+        android:layout_height="600dp"
+        />
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="나오나"/>
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="horizontal">
 
+        <Button
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginRight="20dp"
+            android:id="@+id/location_click"/>
+
+        <Button
+            android:layout_width="160dp"
+            android:layout_height="60dp"
+            android:text="러닝 시작"
+            android:id="@+id/start_btn"/>
+
+        <Button
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginLeft="20dp"/>
+
+    </LinearLayout>
 </LinearLayout>

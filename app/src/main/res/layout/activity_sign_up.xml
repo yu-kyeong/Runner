@@ -32,6 +32,16 @@
             android:textSize="16dp"
             android:hint="이메일 입력"/>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/email_error"
+            android:layout_marginLeft="15dp"
+            android:textColor="#ED5E5E"
+            android:text="이메일 형식이 아닙니다."
+            android:visibility="gone"
+            />
+
         <EditText
             android:layout_width="350dp"
             android:id="@+id/new_pwd"
@@ -40,6 +50,16 @@
             android:textSize="16dp"
             android:inputType="textPassword"
             android:hint="비밀번호 입력"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/password_error"
+            android:layout_marginLeft="15dp"
+            android:textColor="#ED5E5E"
+            android:text="비밀번호 형식이 아닙니다."
+            android:visibility="gone"
+            />
 
         <EditText
             android:layout_width="350dp"
@@ -50,13 +70,24 @@
             android:inputType="textPassword"
             android:hint="비밀번호 확인"/>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/rePassword_error"
+            android:layout_marginLeft="15dp"
+            android:textColor="#ED5E5E"
+            android:text="비밀번호가 다릅니다."
+            android:visibility="gone"
+            />
+
         <EditText
             android:layout_width="350dp"
             android:id="@+id/new_nick"
             android:layout_height="wrap_content"
+            android:maxLength="5"
             android:layout_margin="10dp"
             android:textSize="16dp"
-            android:hint="닉네임 입력"/>
+            android:hint="닉네임 입력 (5글자 이하)"/>
 
     </LinearLayout>
 
@@ -76,7 +107,7 @@
             android:maxLength="8"
             android:id="@+id/birthday"
             android:inputType="date"
-            android:hint="\t생년원일 (숫자만 입력)"/>
+            android:hint="\t생년원일 예)19910101"/>
 
         <!--<EditText
             android:layout_width="wrap_content"

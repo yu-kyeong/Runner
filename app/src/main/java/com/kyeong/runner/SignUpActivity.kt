@@ -96,14 +96,14 @@ class SignUpActivity : AppCompatActivity() {
             }
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                if(Pattern.matches("^(?=.*\\d)(?=.*[~`!@#$%\\^&*()-])(?=.*[a-zA-Z]).{8,20}$", password.text.toString()) ){
+                if(Pattern.matches("^(?=.*\\d)(?=.*[~`!@#$%\\^&*()-])(?=.*[a-zA-Z]).{8,16}$", password.text.toString()) ){
                     Log.d("signUpActivity","password if 들어옴")
                     password.backgroundTintList = applicationContext.getColorStateList(
                         R.color.colorAccent
                     )
                     passwordError.visibility = View.GONE
                 }
-                if(!Pattern.matches("^(?=.*\\d)(?=.*[~`!@#$%\\^&*()-])(?=.*[a-zA-Z]).{8,20}$", password.text.toString())){
+                if(!Pattern.matches("^(?=.*\\d)(?=.*[~`!@#$%\\^&*()-])(?=.*[a-zA-Z]).{8,16}$", password.text.toString())){
                     Log.d("signUpActivity","password !if 들어옴")
                     password.backgroundTintList = applicationContext.getColorStateList(
                         R.color.changeEdittext

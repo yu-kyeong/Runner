@@ -57,7 +57,7 @@
             android:id="@+id/password_error"
             android:layout_marginLeft="15dp"
             android:textColor="#ED5E5E"
-            android:text="비밀번호 형식이 아닙니다."
+            android:text="영문 숫자 특수기호 포함 8~16자로 입력 해주세요."
             android:visibility="gone"
             />
 
@@ -89,6 +89,16 @@
             android:textSize="16dp"
             android:hint="닉네임 입력 (5글자 이하)"/>
 
+        <EditText
+            android:layout_width="350dp"
+            android:layout_height="wrap_content"
+            android:maxLength="8"
+            android:layout_margin="10dp"
+            android:id="@+id/birthday"
+            android:inputType="date"
+            android:textSize="16dp"
+            android:hint="생년원일 예)19910101"/>
+
     </LinearLayout>
 
     <LinearLayout
@@ -99,15 +109,7 @@
         android:layout_marginRight="20dp"
         >
 
-        <EditText
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="20dp"
-            android:layout_weight="1"
-            android:maxLength="8"
-            android:id="@+id/birthday"
-            android:inputType="date"
-            android:hint="\t생년원일 예)19910101"/>
+
 
         <!--<EditText
             android:layout_width="wrap_content"

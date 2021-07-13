@@ -71,7 +71,7 @@ class LoginActivity : AppCompatActivity() {
                     val user = auth.currentUser
                     updateUI(user)
 
-                    val intent = Intent(this@LoginActivity , MapActivity::class.java)
+                    val intent = Intent(this@LoginActivity , TabLayoutActivity::class.java)
                     intent.putExtra("id", email.text.toString())
                     intent.putExtra("pwd", password.text.toString())
                     Log.d("id : ",  email.text.toString())
@@ -81,7 +81,7 @@ class LoginActivity : AppCompatActivity() {
                 } else {
                     // If sign in fails, display a message to the user.
                     Log.w("TAG", "signInWithEmail:failure", task.exception)
-                    Toast.makeText(baseContext, "Authentication failed.",
+                    Toast.makeText(baseContext, "아이디 또는 비밀번호가 잘못 입력 되었습니다.",
                         Toast.LENGTH_SHORT).show()
                     updateUI(null)
                 }

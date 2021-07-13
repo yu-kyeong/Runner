@@ -270,7 +270,6 @@ class MapActivity : AppCompatActivity() {
     inner class GetMyLocationListener : LocationListener {
         override fun onLocationChanged(p0: Location) {
 
-
             setMyLocation(p0)
             Log.d("test", "setMyLocation : ${p0.latitude} , ${p0.longitude}")
             locationManager.removeUpdates(this)

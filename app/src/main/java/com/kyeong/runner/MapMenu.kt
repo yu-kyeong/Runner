@@ -2,7 +2,9 @@ package com.kyeong.runner
 
 import android.Manifest
 import android.app.Activity
+import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
@@ -18,14 +20,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.content.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import com.google.android.gms.maps.*
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 import kotlinx.android.synthetic.main.fragment_map_menu.*
 
 
@@ -40,7 +40,10 @@ class MapMenu : Fragment() , OnMapReadyCallback {
     lateinit var map: GoogleMap
     lateinit var mLocation : Location
     lateinit var mCameraPosition : CameraPosition
-    lateinit var locationManager: LocationManager
+
+    var locationManager: LocationManager? = null
+    var locationListener : LocationListener? = null
+
 
     lateinit var mapView: MapView
 
@@ -54,7 +57,7 @@ class MapMenu : Fragment() , OnMapReadyCallback {
     var defaultLocation : LatLng = LatLng(37.0,126.0)
 
     //marker
-    lateinit var marker: Marker
+    var marker: Marker? = null
 
     lateinit var mContext : FragmentActivity
 
@@ -114,6 +117,42 @@ class MapMenu : Fragment() , OnMapReadyCallback {
         //Activity가 처음 생성될 때 실행되는 함수
         MapsInitializer.initialize(mContext)
 
+        locationManager = mContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        locationListener = object : LocationListener{
+            override fun onLocationChanged(p0: Location) {
+                var lat = 0.0
+                var lon = 0.0
+                if (p0 != null){
+                    lat = p0.latitude
+                    lon = p0.longitude
+                    Log.d("MapMenu","location : $lat + $lon")
+                }
+
+                var currentLocation : LatLng = LatLng(lat, lon)
+
+            map.addMarker(MarkerOptions().position(currentLocation))
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 18f))
+            }
+            override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
+
+            override fun onProviderEnabled(provider: String) {}
+
+            override fun onProviderDisabled(provider: String) {}
+        }
+        /*location_click.setOnClickListener {
+            if (checkSelfPermission(mContext,Manifest.permission.ACCESS_COARSE_LOCATION)
+            == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
+                    mContext, Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED){
+                locationManager!!.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER,
+                    3000L,
+                    30f,
+                    locationListener as LocationListener
+                )
+            }
+        }*/
+
 
     }
 
@@ -140,13 +179,13 @@ class MapMenu : Fragment() , OnMapReadyCallback {
             map = googleMap
             Log.d("MapMenu", "onMapReady")
             location_click.setOnClickListener {
-
+                getMyLocation()
             }
             start_btn.setOnClickListener {
                 Log.d("MapMenu", "RunningState : $runState ")
                 runningState()
             }
-            getMyLocation()
+
 
 
      }
@@ -185,28 +224,30 @@ class MapMenu : Fragment() , OnMapReadyCallback {
             }
         }
 
-        if(marker != null){
-            marker.remove()
-        }
-        //var markerOptions : MarkerOptions
-        marker.position
     }
 
     private fun getMyLocation(){
 
         Log.d("MapMenu", "getMyLocation")
+        val listener = GetMyLocationListener()
 
-        if (ContextCompat.checkSelfPermission(mContext,
-            android.Manifest.permission.ACCESS_FINE_LOCATION)
-        == PackageManager.PERMISSION_GRANTED){
-            return
+        if (checkSelfPermission(mContext,Manifest.permission.ACCESS_COARSE_LOCATION)
+            == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
+                mContext, Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED){
+            locationManager!!.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER,
+                3000L,
+                30f,
+                listener
+            )
         }
 
         //이전에 측정한 값을 가져온다
         val locationG : Location? =
-           locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+           locationManager?.getLastKnownLocation(LocationManager.GPS_PROVIDER)
         var locationW : Location? =
-            locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+            locationManager?.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
 
         if (locationG != null){
             Log.d("MapMenu", "locationG : " + locationG.toString())
@@ -219,14 +260,14 @@ class MapMenu : Fragment() , OnMapReadyCallback {
         }
 
         //새롭게 측정한다
-        val listener = GetMyLocationListener()
-        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+
+        if (locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER) == true){
             Log.d("MapMenu", "GPS")
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER , 10 , 10f , listener)
+            locationManager?.requestLocationUpdates(LocationManager.GPS_PROVIDER , 10 , 10f , listener)
         }
-        if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
+        if (locationManager?.isProviderEnabled(LocationManager.NETWORK_PROVIDER) == true){
             Log.d("MapMenu", "Network")
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10 , 10f , listener)
+            locationManager?.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10 , 10f , listener)
         }
 
     }
@@ -242,6 +283,17 @@ class MapMenu : Fragment() , OnMapReadyCallback {
         }
     }
 
+    //움직이는 위치 그리기
+    fun drawPath() {
+        //startPos = LatLng(position.latitude, position.longitude)
+        Log.d("runState", "Draw")
+        val option: PolylineOptions = PolylineOptions()
+            .add(startPos).add(endPos).color(Color.BLUE).width(12f).geodesic(true)
+        map.addPolyline(option)
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(startPos, 18f))
+
+    }
+
     inner class GetMyLocationListener : LocationListener{
         override fun onLocationChanged(p0: Location) {
             setMyLocation(p0)
@@ -249,7 +301,7 @@ class MapMenu : Fragment() , OnMapReadyCallback {
             Log.d("MapMenu", "onLocationChanged - Longitude : ${p0.longitude}")
 
             //현재 위치 찾기
-            locationManager.removeUpdates(this)
+            locationManager?.removeUpdates(this)
             var lat = p0.latitude
             var lon = p0.longitude
             position = LatLng(lat,lon)
@@ -261,12 +313,12 @@ class MapMenu : Fragment() , OnMapReadyCallback {
                     .position(position)
             )
             if (marker != null){
-                Log.d("MapMenu", "marker position1 : " + marker.position.toString())
-                marker.remove()
+                Log.d("MapMenu", "marker position1 : " + marker?.position.toString())
+                marker?.remove()
                 val markerOptions = MarkerOptions()
                 markerOptions.position(position)
                 marker = map.addMarker(markerOptions)
-                Log.d("MapMenu", "marker position2 : " + marker.position.toString())
+                Log.d("MapMenu", "marker position2 : " + marker?.position.toString())
 
             }
 
@@ -279,7 +331,7 @@ class MapMenu : Fragment() , OnMapReadyCallback {
             if (runState){
                 Log.d("MapMenu", "startPos if : $startPos")
                 endPos = LatLng(lat, lon)
-
+                drawPath()
                 startPos = LatLng(lat,lon)
 
                 Thread.sleep(300)

@@ -25,6 +25,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        supportActionBar?.setIcon(R.drawable.runner_logo)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
+        supportActionBar?.setDisplayUseLogoEnabled(true)
+
         //button
         val signUp : Button = findViewById(R.id.sign_up)
          logIn = findViewById(R.id.log_in)

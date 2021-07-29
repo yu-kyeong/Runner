@@ -10,23 +10,29 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
-import android.provider.SettingsSlicesContract.KEY_LOCATION
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.core.content.ContextCompat.getSystemService
-import androidx.core.content.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.FragmentManager
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
+import kotlinx.android.synthetic.main.activity_tab_layout.*
 import kotlinx.android.synthetic.main.fragment_map_menu.*
+import kotlinx.android.synthetic.main.running_reset_dialog.view.*
+import kotlinx.android.synthetic.main.running_stop_dialog.view.*
+import kotlinx.android.synthetic.main.running_stop_dialog.view.keepRun_btn
+import java.sql.Time
+import java.util.*
+import kotlin.concurrent.timer
 
 
 class MapMenu : Fragment() , OnMapReadyCallback {
@@ -38,17 +44,17 @@ class MapMenu : Fragment() , OnMapReadyCallback {
 
     //Location , map
     lateinit var map: GoogleMap
-    lateinit var mLocation : Location
-    lateinit var mCameraPosition : CameraPosition
 
     var locationManager: LocationManager? = null
     var locationListener : LocationListener? = null
 
-
+    //inflate 될 view
     lateinit var mapView: MapView
 
     //러닝 시작유무
     var runState: Boolean = false
+    //일시정지 T/F
+    var pauseState : Boolean = false
 
     //현재 위치
     var position: LatLng = LatLng(0.0, 0.0)
@@ -58,6 +64,10 @@ class MapMenu : Fragment() , OnMapReadyCallback {
 
     //marker
     var marker: Marker? = null
+
+    //timer
+    private var time = 0
+    private var timerTask : Timer? = null
 
     lateinit var mContext : FragmentActivity
 
@@ -118,42 +128,28 @@ class MapMenu : Fragment() , OnMapReadyCallback {
         MapsInitializer.initialize(mContext)
 
         locationManager = mContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        locationListener = object : LocationListener{
+        locationListener = object : LocationListener {
             override fun onLocationChanged(p0: Location) {
                 var lat = 0.0
                 var lon = 0.0
-                if (p0 != null){
+                if (p0 != null) {
                     lat = p0.latitude
                     lon = p0.longitude
-                    Log.d("MapMenu","location : $lat + $lon")
+                    Log.d("MapMenu", "location : $lat + $lon")
                 }
 
-                var currentLocation : LatLng = LatLng(lat, lon)
+                var currentLocation: LatLng = LatLng(lat, lon)
 
-            map.addMarker(MarkerOptions().position(currentLocation))
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 18f))
+                //map.addMarker(MarkerOptions().position(currentLocation))
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 18f))
             }
+
             override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
 
             override fun onProviderEnabled(provider: String) {}
 
             override fun onProviderDisabled(provider: String) {}
         }
-        /*location_click.setOnClickListener {
-            if (checkSelfPermission(mContext,Manifest.permission.ACCESS_COARSE_LOCATION)
-            == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
-                    mContext, Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED){
-                locationManager!!.requestLocationUpdates(
-                    LocationManager.GPS_PROVIDER,
-                    3000L,
-                    30f,
-                    locationListener as LocationListener
-                )
-            }
-        }*/
-
-
     }
 
     override fun onRequestPermissionsResult(
@@ -168,30 +164,38 @@ class MapMenu : Fragment() , OnMapReadyCallback {
                 return
             }
         }
-        //init()
     }
 
-
-
-
-
-        override fun onMapReady(googleMap: GoogleMap) {
-            map = googleMap
-            Log.d("MapMenu", "onMapReady")
-            location_click.setOnClickListener {
-                getMyLocation()
-            }
-            start_btn.setOnClickListener {
-                Log.d("MapMenu", "RunningState : $runState ")
-                runningState()
-            }
-
-
-
+    override fun onMapReady(googleMap: GoogleMap) {
+        map = googleMap
+        Log.d("MapMenu", "onMapReady")
+        location_click.setOnClickListener {
+            getMyLocation()
+        }
+        //타이머 시작
+        start_btn.setOnClickListener {
+            Log.d("MapMenu", "RunningState : $runState ")
+            runningStart()
+        }
+        //타이머 종료
+        stop_btn.setOnClickListener {
+            Log.d("MapMenu","RunningStop")
+            runningStop()
+        }
+        //일시정지
+        pause_btn.setOnClickListener {
+            Log.d("MapMenu","RunningPause")
+            runningPause()
+        }
+        //초기화
+        reset_btn.setOnClickListener {
+            Log.d("MapMenu", "RunningReset")
+            runningReset()
+        }
+        getMyLocation()
      }
     
     fun setMyLocation(location: Location){
-
         Log.d("MapMenu", "setMyLocation")
 
         Log.d("MapMenu", "위도 : ${location.latitude}")
@@ -210,7 +214,6 @@ class MapMenu : Fragment() , OnMapReadyCallback {
                 return
             }
         }
-
         //현재위치 표시
         map.isMyLocationEnabled = true
 
@@ -230,7 +233,7 @@ class MapMenu : Fragment() , OnMapReadyCallback {
 
         Log.d("MapMenu", "getMyLocation")
         val listener = GetMyLocationListener()
-
+        /*
         if (checkSelfPermission(mContext,Manifest.permission.ACCESS_COARSE_LOCATION)
             == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
                 mContext, Manifest.permission.ACCESS_FINE_LOCATION
@@ -241,6 +244,13 @@ class MapMenu : Fragment() , OnMapReadyCallback {
                 30f,
                 listener
             )
+        }*/
+
+        // 권한 확인 작업
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(mContext,Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED) {
+                return
+            }
         }
 
         //이전에 측정한 값을 가져온다
@@ -250,17 +260,16 @@ class MapMenu : Fragment() , OnMapReadyCallback {
             locationManager?.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
 
         if (locationG != null){
-            Log.d("MapMenu", "locationG : " + locationG.toString())
+            Log.d("MapMenu", "locationG : $locationG")
             setMyLocation(locationG)
         }else{
             if (locationW != null){
-                Log.d("MapMenu", "locationW : " + locationG.toString())
+                Log.d("MapMenu", "locationW : $locationW")
                 setMyLocation(locationW)
             }
         }
 
         //새롭게 측정한다
-
         if (locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER) == true){
             Log.d("MapMenu", "GPS")
             locationManager?.requestLocationUpdates(LocationManager.GPS_PROVIDER , 10 , 10f , listener)
@@ -269,17 +278,212 @@ class MapMenu : Fragment() , OnMapReadyCallback {
             Log.d("MapMenu", "Network")
             locationManager?.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10 , 10f , listener)
         }
+    }
+
+    //타이머 시작
+    private fun runningStart(){
+        Log.d("MapMenu","runningStart")
+        timerTask = null
+        if (!runState) {
+            Log.d("MapMenu","runState = $runState")
+            Toast.makeText(context, "러닝 시작", Toast.LENGTH_SHORT).show()
+            runState = true
+            stop_btn.visibility = View.VISIBLE
+            start_btn.visibility = View.GONE
+            timer_page.visibility = View.VISIBLE
+            reset_btn.visibility = View.VISIBLE
+            pause_btn.visibility = View.VISIBLE
+
+            timerTask = timer(period = 10){
+                time++
+
+                val hour = (time / 144000) % 24 // 1시간
+                val min = (time / 6000) % 60 // 1분
+                val sec = (time / 100) % 60 // 1초
+                //val mill = time % 100 // 0.01초
+
+                mContext.runOnUiThread {
+                    if (hour < 10){
+                        hour_text.text = "0$hour : "
+                        if(min < 10){
+                            min_text.text = "0$min : "
+                        }else{
+                            min_text.text = "$min : "
+                        }
+                        if (sec < 10){
+                            sec_text.text = "0$sec"
+                        }else{
+                            sec_text.text = "$sec"
+                        }
+                    }else{
+                        hour_text.text = "$hour : "
+                        if(min < 10){
+                            min_text.text = "0$min : "
+                        }else{
+                            min_text.text = "$min : "
+                        }
+                        if (sec < 10){
+                            sec_text.text = "0$sec"
+                        }else{
+                            sec_text.text = "$sec"
+                        }
+                    }
+
+                }
+            }//timerTask 끝
+        }
+            //Toast.makeText(context,"러닝 종료", Toast.LENGTH_SHORT).show()
+    }
+
+    //타이머 종료
+    private fun runningStop(){
+        Log.d("MapMenu","runningStop")
+        Log.d("MapMenu","runState = $runState")
+
+        //멈춘 시간 저장
+        val lapTime = time
+
+        //apply() 스코프 함수 TextView 를 생성과 동시에 초기화
+       /* val textView = TextView(mContext).apply {
+            textSize = 20f
+            text = "${lapTime/100} : ${lapTime%100}" //출력할 시간
+        }*/
+
+
+        //val inflater = context?.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val dialogView = layoutInflater.inflate(R.layout.running_stop_dialog, null)
+        val builder = AlertDialog.Builder(mContext)
+            .create()
+            builder.setView(dialogView)
+            builder.show()
+
+        dialogView.end_btn.setOnClickListener {
+            stop_btn.visibility = View.GONE
+            start_btn.visibility = View.VISIBLE
+            timer_page.visibility = View.GONE
+            builder.dismiss()
+            runState = false
+            timerTask?.cancel()
+
+            //tab_layout.visibility = View.VISIBLE //tab 나타내기
+
+            Log.d("MapMenu","LapTime = ${lapTime % 100} : ${lapTime / 100}")
+        }
+
+        dialogView.keepRun_btn.setOnClickListener {
+            Log.d("MapMenu","keepRunning")
+            builder.dismiss()
+        }
+    }
+    //타이머 일시정지
+    private fun runningPause(){
+        val lapTime = time
+        if (!pauseState) {
+            timerTask?.cancel()
+            pause_btn.text = "이어 달리기"
+            pauseState = true
+        }else{
+            timerTask = timer(period = 10){
+                time++
+
+                val hour = (time / 144000) % 24 // 1시간
+                val min = (time / 6000) % 60 // 1분
+                val sec = (time / 100) % 60 // 1초
+                //val mill = time % 100 // 0.01초
+
+                mContext.runOnUiThread {
+                    if (hour < 10){
+                        hour_text.text = "0$hour : "
+                        if(min < 10){
+                            min_text.text = "0$min : "
+                        }else{
+                            min_text.text = "$min : "
+                        }
+                        if (sec < 10){
+                            sec_text.text = "0$sec"
+                        }else{
+                            sec_text.text = "$sec"
+                        }
+                    }else{
+                        hour_text.text = "$hour : "
+                        if(min < 10){
+                            min_text.text = "0$min : "
+                        }else{
+                            min_text.text = "$min : "
+                        }
+                        if (sec < 10){
+                            sec_text.text = "0$sec"
+                        }else{
+                            sec_text.text = "$sec"
+                        }
+                    }
+
+                }
+            }//timerTask 끝
+
+            pause_btn.text = "일시정지"
+            pauseState = false
+
+        }
 
     }
 
-    fun runningState(){
-        if (!runState){
-            Toast.makeText(mContext, "러닝 시작", Toast.LENGTH_SHORT)
-            runState = true
+    //타이머 초기화
+    private fun runningReset(){
+        val dialogView2 = layoutInflater.inflate(R.layout.running_reset_dialog, null)
+        val builder = AlertDialog.Builder(mContext)
+            .create()
+        builder.setView(dialogView2)
+        builder.show()
 
-        }else {
-            Toast.makeText(mContext,"러닝 종료", Toast.LENGTH_SHORT)
-            runState = false
+        dialogView2.keepRun_btn.setOnClickListener {
+            builder.dismiss()
+        }
+        dialogView2.reset_btn.setOnClickListener {
+            timerTask?.cancel()
+            time = 0
+
+            timerTask = timer(period = 10){
+                time++
+
+                val hour = (time / 144000) % 24 // 1시간
+                val min = (time / 6000) % 60 // 1분
+                val sec = (time / 100) % 60 // 1초
+                //val mill = time % 100 // 0.01초
+
+                mContext.runOnUiThread {
+                    if (hour < 10){
+                        hour_text.text = "0$hour : "
+                        if(min < 10){
+                            min_text.text = "0$min : "
+                        }else{
+                            min_text.text = "$min : "
+                        }
+                        if (sec < 10){
+                            sec_text.text = "0$sec"
+                        }else{
+                            sec_text.text = "$sec"
+                        }
+                    }else{
+                        hour_text.text = "$hour : "
+                        if(min < 10){
+                            min_text.text = "0$min : "
+                        }else{
+                            min_text.text = "$min : "
+                        }
+                        if (sec < 10){
+                            sec_text.text = "0$sec"
+                        }else{
+                            sec_text.text = "$sec"
+                        }
+                    }
+
+                }
+            }//timerTask 끝
+
+
+
+            builder.dismiss()
         }
     }
 

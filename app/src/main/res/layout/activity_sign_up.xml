@@ -32,13 +32,34 @@
             android:textSize="16dp"
             android:hint="이메일 입력"/>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/email_error"
+            android:layout_marginLeft="15dp"
+            android:textColor="#ED5E5E"
+            android:text="이메일 형식이 아닙니다."
+            android:visibility="gone"
+            />
+
         <EditText
             android:layout_width="350dp"
             android:id="@+id/new_pwd"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:textSize="16dp"
+            android:inputType="textPassword"
             android:hint="비밀번호 입력"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/password_error"
+            android:layout_marginLeft="15dp"
+            android:textColor="#ED5E5E"
+            android:text="영문 숫자 특수기호 포함 8~16자로 입력 해주세요."
+            android:visibility="gone"
+            />
 
         <EditText
             android:layout_width="350dp"
@@ -46,15 +67,65 @@
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:textSize="16dp"
-            android:hint="비밀번호 재입력"/>
+            android:inputType="textPassword"
+            android:hint="비밀번호 확인"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/rePassword_error"
+            android:layout_marginLeft="15dp"
+            android:textColor="#ED5E5E"
+            android:text="비밀번호가 다릅니다."
+            android:visibility="gone"
+            />
 
         <EditText
             android:layout_width="350dp"
             android:id="@+id/new_nick"
             android:layout_height="wrap_content"
+            android:maxLength="5"
             android:layout_margin="10dp"
             android:textSize="16dp"
-            android:hint="닉네임 입력"/>
+            android:hint="닉네임 입력 (5글자 이하)"/>
+
+        <EditText
+            android:layout_width="350dp"
+            android:layout_height="wrap_content"
+            android:maxLength="8"
+            android:layout_margin="10dp"
+            android:id="@+id/birthday"
+            android:inputType="date"
+            android:textSize="16dp"
+            android:hint="생년원일 예)19910101"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="20dp"
+        >
+
+        <!--<EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="20dp"
+            android:layout_weight="1"
+            android:maxLength="2"
+            android:id="@+id/month"
+            android:hint="\t월"/>
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="20dp"
+            android:layout_weight="1"
+            android:maxLength="2"
+            android:id="@+id/days"
+            android:hint="\t일"/>-->
 
     </LinearLayout>
 
@@ -66,20 +137,23 @@
         <RadioGroup
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:id="@+id/radio_group"
             android:orientation="horizontal">
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/male"
+            android:checked="true"
             android:layout_weight="1"
             android:text="남성"/>
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/female"
             android:layout_weight="1"
             android:text="여성"/>
 
         </RadioGroup>
-
 
     </LinearLayout>
     
@@ -101,7 +175,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
-
     </LinearLayout>-->
 
     <Button
@@ -112,6 +185,5 @@
         android:text="회원가입"
         android:textAppearance="@style/TextAppearance.AppCompat"
         android:background="@drawable/sign_up"/>
-
 
 </LinearLayout>
